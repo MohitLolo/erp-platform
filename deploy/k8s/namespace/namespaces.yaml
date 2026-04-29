@@ -1,0 +1,26 @@
+---
+# 开发环境命名空间
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: erp-dev
+  labels:
+    env: dev
+    managed-by: kubectl
+---
+# 生产环境命名空间
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: erp-prod
+  labels:
+    env: prod
+    managed-by: kubectl
+---
+# 基础设施命名空间（MySQL/Redis/RabbitMQ/Seata等）
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: erp-infra
+  labels:
+    component: infrastructure

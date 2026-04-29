@@ -1,0 +1,33 @@
+---
+# 生产环境公共配置（通过环境变量注入各服务）
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: erp-common-config
+  namespace: erp-prod
+data:
+  SPRING_PROFILES_ACTIVE: "prod"
+  REDIS_HOST: "redis.erp-infra.svc.cluster.local"
+  REDIS_PORT: "6379"
+  RABBITMQ_HOST: "rabbitmq.erp-infra.svc.cluster.local"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USERNAME: "erp"
+  SEATA_HOST: "seata-server.erp-infra.svc.cluster.local"
+  SEATA_PORT: "8091"
+
+---
+# 开发环境公共配置
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: erp-common-config
+  namespace: erp-dev
+data:
+  SPRING_PROFILES_ACTIVE: "dev"
+  REDIS_HOST: "redis.erp-infra.svc.cluster.local"
+  REDIS_PORT: "6379"
+  RABBITMQ_HOST: "rabbitmq.erp-infra.svc.cluster.local"
+  RABBITMQ_PORT: "5672"
+  RABBITMQ_USERNAME: "erp"
+  SEATA_HOST: "seata-server.erp-infra.svc.cluster.local"
+  SEATA_PORT: "8091"

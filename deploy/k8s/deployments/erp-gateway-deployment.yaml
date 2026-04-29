@@ -1,0 +1,112 @@
+---
+# erp-gateway Deployment
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: erp-gateway
+  namespace: erp-prod
+  labels:
+    app: erp-gateway
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: erp-gateway
+  template:
+    metadata:
+      labels:
+        app: erp-gateway
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "9000"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      initContainers:
+        - name: skywalking-agent-init
+          image: harbor.example.com/infra/skywalking-agent:9.3.0
+          command: ["sh", "-c", "cp -r /skywalking/agent /agent-volume/"]
+          volumeMounts:
+            - name: skywalking-agent
+              mountPath: /agent-volume
+
+      containers:
+        - name: erp-gateway
+          image: harbor.example.com/erp/erp-gateway:${IMAGE_TAG}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9000
+              name: http
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: >-
+                -javaagent:/skywalking/agent/skywalking-agent.jar
+                -Dskywalking.agent.service_name=erp-gateway
+                -Dskywalking.collector.backend_service=skywalking-oap.erp-infra.svc.cluster.local:11800
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: erp-common-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: erp-common-config
+                  key: REDIS_HOST
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: erp-common-secret
+                  key: redis-password
+            - name: SA_TOKEN_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: erp-common-secret
+                  key: sa-token-secret
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "1024Mi"
+          livenessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9000
+            initialDelaySeconds: 45
+            periodSeconds: 15
+          readinessProbe:
+            httpGet:
+              path: /actuator/health
+              port: 9000
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: skywalking-agent
+              mountPath: /skywalking
+
+      volumes:
+        - name: skywalking-agent
+          emptyDir: {}
+      terminationGracePeriodSeconds: 30
+      imagePullSecrets:
+        - name: harbor-registry-secret
+
+---
+# gateway Service（NodePort，对外暴露）
+apiVersion: v1
+kind: Service
+metadata:
+  name: erp-gateway
+  namespace: erp-prod
+  labels:
+    app: erp-gateway
+spec:
+  selector:
+    app: erp-gateway
+  ports:
+    - port: 9000
+      targetPort: 9000
+      nodePort: 30900
+      name: http
+  type: NodePort

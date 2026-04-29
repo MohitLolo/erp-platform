@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.erp</groupId>
+        <artifactId>erp-platform</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <groupId>com.erp.api</groupId>
+    <artifactId>erp-apis</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>ERP APIs Parent</name>
+    <description>服务间 API 模块父 POM（独立版本，发布到 Maven 私服）</description>
+
+    <modules>
+        <module>erp-api-system</module>
+        <module>erp-api-base</module>
+        <module>erp-api-inventory</module>
+        <module>erp-api-finance</module>
+    </modules>
+</project>

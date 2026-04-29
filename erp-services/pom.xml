@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.erp</groupId>
+        <artifactId>erp-platform</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>erp-services</artifactId>
+    <version>1.0.0-SNAPSHOT</version>
+    <packaging>pom</packaging>
+    <name>ERP Services Parent</name>
+    <description>业务服务父 POM（仅打 Docker 镜像，不发布 jar）</description>
+
+    <modules>
+        <module>erp-gateway</module>
+        <module>erp-auth</module>
+        <module>erp-system</module>
+        <module>erp-base</module>
+        <module>erp-purchase</module>
+        <module>erp-sale</module>
+        <module>erp-inventory</module>
+        <module>erp-finance</module>
+        <module>erp-production</module>
+        <module>erp-report</module>
+    </modules>
+
+    <!-- 所有业务服务公共依赖 -->
+    <dependencies>
+        <dependency>
+            <groupId>com.erp.commons</groupId>
+            <artifactId>erp-common-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.erp.commons</groupId>
+            <artifactId>erp-common-log</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.erp.commons</groupId>
+            <artifactId>erp-common-web</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <!-- smart-doc 统一声明（各服务自行配置 src/main/resources/smart-doc.json） -->
+            <plugin>
+                <groupId>com.ly.smart-doc</groupId>
+                <artifactId>smart-doc-maven-plugin</artifactId>
+                <version>${smart-doc.version}</version>
+                <configuration>
+                    <configFile>./src/main/resources/smart-doc.json</configFile>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>

@@ -1,0 +1,127 @@
+server:
+  port: 8080
+  shutdown: graceful  # 优雅关闭，配合 terminationGracePeriodSeconds
+
+spring:
+  application:
+    name: erp-inventory
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+
+  datasource:
+    url: ${DB_URL:jdbc:mysql://localhost:3306/erp_inventory?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&useSSL=false}
+    username: ${DB_USERNAME:root}
+    password: ${DB_PASSWORD:Erp@123456}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    hikari:
+      minimum-idle: 5
+      maximum-pool-size: 20
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
+      connection-test-query: SELECT 1
+
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: 6379
+      password: ${REDIS_PASSWORD:Erp@redis2024}
+      timeout: 3000ms
+      lettuce:
+        pool:
+          max-active: 16
+          max-idle: 8
+          min-idle: 2
+
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: 5672
+    username: ${RABBITMQ_USERNAME:erp}
+    password: ${RABBITMQ_PASSWORD:Erp@rabbit2024}
+    virtual-host: /
+    listener:
+      simple:
+        acknowledge-mode: manual       # 手动 ACK，避免消息丢失
+        prefetch: 1                    # 每次只取一条，处理完再取下一条
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 2000ms
+          multiplier: 2.0
+
+# Sa-Token（仅校验，不登录；token 由 Gateway 传入后各服务读取）
+sa-token:
+  token-name: Authorization
+  jwt-secret-key: ${SA_TOKEN_JWT_SECRET:dev-jwt-secret-key-erp-platform-2024}
+  is-share: false
+  token-style: terse-uuid
+
+# Seata AT 分布式事务
+seata:
+  enabled: true
+  application-id: erp-inventory
+  tx-service-group: erp-inventory-group
+  service:
+    vgroup-mapping:
+      erp-inventory-group: default
+  config:
+    type: file
+  registry:
+    type: file
+
+# MyBatis-Plus
+mybatis-plus:
+  mapper-locations: classpath*:mapper/**/*.xml
+  type-aliases-package: com.erp.inventory.domain.entity
+  configuration:
+    map-underscore-to-camel-case: true
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl  # dev 环境打印 SQL
+  global-config:
+    db-config:
+      logic-delete-field: deleted
+      logic-delete-value: 1
+      logic-not-delete-value: 0
+      id-type: auto
+
+# Actuator 暴露 Prometheus 端点
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,prometheus,metrics
+  endpoint:
+    health:
+      show-details: always
+      probes:
+        enabled: true   # 开启 K8s liveness/readiness probe 端点
+  metrics:
+    tags:
+      application: ${spring.application.name}
+
+# OpenFeign 超时配置
+feign:
+  client:
+    config:
+      default:
+        connect-timeout: 3000
+        read-timeout: 5000
+  circuitbreaker:
+    enabled: true
+
+# Resilience4j 熔断配置
+resilience4j:
+  circuitbreaker:
+    configs:
+      default:
+        failure-rate-threshold: 50
+        wait-duration-in-open-state: 30s
+        sliding-window-size: 10
+        minimum-number-of-calls: 5
+    instances:
+      baseFeignClient:
+        base-config: default
+
+logging:
+  level:
+    com.erp.inventory: debug
+    io.seata: info

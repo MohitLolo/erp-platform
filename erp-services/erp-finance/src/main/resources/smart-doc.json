@@ -1,0 +1,51 @@
+{
+  "serverUrl": "http://localhost:8080",
+  "pathPrefix": "",
+  "isStrict": false,
+  "allInOne": true,
+  "outPath": "src/main/resources/static/doc",
+  "coverOld": true,
+  "style": "xt256",
+  "createDebugPage": false,
+  "packageFilters": "",
+  "md5EncryptedHtmlName": false,
+  "projectName": "erp-finance",
+  "skipTransientField": true,
+  "showAuthor": false,
+  "inlineEnum": true,
+  "recursionLimit": 7,
+  "allInOneDocFileName": "index.html",
+  "requestExample": true,
+  "requestParamsTable": true,
+  "responseParamsTable": true,
+  "dataDictionaries": [],
+  "errorCodeDictionaries": [
+    {
+      "title": "业务错误码",
+      "enumClassName": "com.erp.common.core.response.ResultCode",
+      "codeField": "code",
+      "descField": "message"
+    }
+  ],
+  "revisionLogs": [],
+  "customResponseFields": [],
+  "requestHeaders": [
+    {
+      "name": "Authorization",
+      "type": "string",
+      "desc": "Sa-Token JWT，格式: Bearer <token>",
+      "required": true,
+      "since": "-"
+    },
+    {
+      "name": "X-Tenant-Id",
+      "type": "string",
+      "desc": "租户ID",
+      "required": true,
+      "since": "-"
+    }
+  ],
+  "requestParams": [],
+  "rpcApiDependencies": [],
+  "apiObjectReplacements": []
+}

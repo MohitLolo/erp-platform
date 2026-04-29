@@ -1,0 +1,123 @@
+---
+# erp-sale 灰度发布 Deployment（v2）
+# 只有带 X-Gray-Tag: v2 的请求才会路由到此
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: erp-sale-v2
+  namespace: erp-prod
+  labels:
+    app: erp-sale
+    version: v2
+spec:
+  replicas: 1  # 灰度阶段少量实例
+  selector:
+    matchLabels:
+      app: erp-sale
+      version: v2
+  template:
+    metadata:
+      labels:
+        app: erp-sale
+        version: v2
+    spec:
+      initContainers:
+        - name: skywalking-agent-init
+          image: harbor.example.com/infra/skywalking-agent:9.3.0
+          command: ["sh", "-c", "cp -r /skywalking/agent /agent-volume/"]
+          volumeMounts:
+            - name: skywalking-agent
+              mountPath: /agent-volume
+
+      containers:
+        - name: erp-sale
+          # 指向v2镜像
+          image: harbor.example.com/erp/erp-sale:${IMAGE_TAG_V2}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: JAVA_TOOL_OPTIONS
+              value: >-
+                -javaagent:/skywalking/agent/skywalking-agent.jar
+                -Dskywalking.agent.service_name=erp-sale-v2
+                -Dskywalking.collector.backend_service=skywalking-oap.erp-infra.svc.cluster.local:11800
+            - name: SPRING_PROFILES_ACTIVE
+              value: "prod"
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: erp-common-config
+                  key: REDIS_HOST
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: erp-sale-secret
+                  key: db-url
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: erp-sale-secret
+                  key: db-username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: erp-sale-secret
+                  key: db-password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: erp-common-secret
+                  key: redis-password
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: erp-common-secret
+                  key: rabbitmq-password
+            - name: SA_TOKEN_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: erp-common-secret
+                  key: sa-token-secret
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "1024Mi"
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+          volumeMounts:
+            - name: skywalking-agent
+              mountPath: /skywalking
+
+      volumes:
+        - name: skywalking-agent
+          emptyDir: {}
+      imagePullSecrets:
+        - name: harbor-registry-secret
+
+---
+# erp-sale-v2 Service（仅接收灰度流量，由网关路由）
+apiVersion: v1
+kind: Service
+metadata:
+  name: erp-sale-v2
+  namespace: erp-prod
+  labels:
+    app: erp-sale
+    version: v2
+spec:
+  selector:
+    app: erp-sale
+    version: v2
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  type: ClusterIP

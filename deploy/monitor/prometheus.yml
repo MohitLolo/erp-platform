@@ -1,0 +1,122 @@
+global:
+  scrape_interval: 15s          # 每 15s 抓取一次指标
+  evaluation_interval: 15s      # 每 15s 评估一次告警规则
+  scrape_timeout: 10s
+  external_labels:
+    cluster: erp-dev
+    env: dev
+
+# 告警规则文件（可扩展）
+rule_files:
+  - "rules/*.yml"
+
+# Alertmanager 集成（可选，生产环境配置）
+# alerting:
+#   alertmanagers:
+#     - static_configs:
+#         - targets: ['alertmanager:9093']
+
+scrape_configs:
+  # ============================================================
+  # Prometheus 自身监控
+  # ============================================================
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: ['localhost:9090']
+
+  # ============================================================
+  # ERP 微服务 Spring Boot Actuator / Prometheus 端点
+  # docker-compose 本地环境直接用容器名
+  # ============================================================
+  - job_name: 'erp-gateway'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:9000']
+        labels:
+          service: erp-gateway
+
+  - job_name: 'erp-auth'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8081']
+        labels:
+          service: erp-auth
+
+  - job_name: 'erp-system'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8082']
+        labels:
+          service: erp-system
+
+  - job_name: 'erp-base'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8083']
+        labels:
+          service: erp-base
+
+  - job_name: 'erp-sale'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8084']
+        labels:
+          service: erp-sale
+
+  - job_name: 'erp-purchase'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8085']
+        labels:
+          service: erp-purchase
+
+  - job_name: 'erp-inventory'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8086']
+        labels:
+          service: erp-inventory
+
+  - job_name: 'erp-finance'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8087']
+        labels:
+          service: erp-finance
+
+  - job_name: 'erp-production'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8088']
+        labels:
+          service: erp-production
+
+  - job_name: 'erp-report'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: ['host.docker.internal:8089']
+        labels:
+          service: erp-report
+
+  # ============================================================
+  # RabbitMQ Prometheus 插件（rabbitmq_prometheus）
+  # ============================================================
+  - job_name: 'rabbitmq'
+    static_configs:
+      - targets: ['erp-rabbitmq:15692']
+        labels:
+          service: rabbitmq
+
+  # ============================================================
+  # MySQL Exporter（可选，生产环境建议部署）
+  # ============================================================
+  # - job_name: 'mysql'
+  #   static_configs:
+  #     - targets: ['mysqld-exporter:9104']
+
+  # ============================================================
+  # Redis Exporter（可选）
+  # ============================================================
+  # - job_name: 'redis'
+  #   static_configs:
+  #     - targets: ['redis-exporter:9121']

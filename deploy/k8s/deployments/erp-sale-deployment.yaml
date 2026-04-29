@@ -1,0 +1,152 @@
+---
+# erp-sale Deployment（含SkyWalking initContainer）
+# 此模板可复用于所有业务服务，替换相应的 name/image/env 即可
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: erp-sale
+  namespace: erp-prod
+  labels:
+    app: erp-sale
+    version: v1
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: erp-sale
+      version: v1
+  template:
+    metadata:
+      labels:
+        app: erp-sale
+        version: v1
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/actuator/prometheus"
+    spec:
+      # SkyWalking Agent注入（initContainer方案，零代码侵入）
+      initContainers:
+        - name: skywalking-agent-init
+          image: harbor.example.com/infra/skywalking-agent:9.3.0
+          command: ["sh", "-c", "cp -r /skywalking/agent /agent-volume/"]
+          volumeMounts:
+            - name: skywalking-agent
+              mountPath: /agent-volume
+
+      containers:
+        - name: erp-sale
+          image: harbor.example.com/erp/erp-sale:${IMAGE_TAG}
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+              name: http
+          env:
+            # SkyWalking Agent配置（通过JAVA_TOOL_OPTIONS注入，无需修改启动命令）
+            - name: JAVA_TOOL_OPTIONS
+              value: >-
+                -javaagent:/skywalking/agent/skywalking-agent.jar
+                -Dskywalking.agent.service_name=erp-sale
+                -Dskywalking.collector.backend_service=skywalking-oap.erp-infra.svc.cluster.local:11800
+            # 公共配置（来自ConfigMap）
+            - name: SPRING_PROFILES_ACTIVE
+              valueFrom:
+                configMapKeyRef:
+                  name: erp-common-config
+                  key: SPRING_PROFILES_ACTIVE
+            - name: REDIS_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: erp-common-config
+                  key: REDIS_HOST
+            - name: RABBITMQ_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: erp-common-config
+                  key: RABBITMQ_HOST
+            # 敏感配置（来自Secret）
+            - name: DB_URL
+              valueFrom:
+                secretKeyRef:
+                  name: erp-sale-secret
+                  key: db-url
+            - name: DB_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: erp-sale-secret
+                  key: db-username
+            - name: DB_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: erp-sale-secret
+                  key: db-password
+            - name: REDIS_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: erp-common-secret
+                  key: redis-password
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: erp-common-secret
+                  key: rabbitmq-password
+            - name: SA_TOKEN_JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: erp-common-secret
+                  key: sa-token-secret
+          resources:
+            requests:
+              cpu: "500m"
+              memory: "512Mi"
+            limits:
+              cpu: "2000m"
+              memory: "1024Mi"
+          # 健康检查
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: 8080
+            initialDelaySeconds: 60
+            periodSeconds: 15
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: 8080
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            failureThreshold: 3
+          volumeMounts:
+            - name: skywalking-agent
+              mountPath: /skywalking
+
+      volumes:
+        - name: skywalking-agent
+          emptyDir: {}
+
+      # 优雅终止（等待已有请求处理完）
+      terminationGracePeriodSeconds: 60
+
+      # 镜像拉取凭证
+      imagePullSecrets:
+        - name: harbor-registry-secret
+
+---
+# erp-sale Service（正式流量）
+apiVersion: v1
+kind: Service
+metadata:
+  name: erp-sale
+  namespace: erp-prod
+  labels:
+    app: erp-sale
+spec:
+  selector:
+    app: erp-sale
+    version: v1
+  ports:
+    - port: 8080
+      targetPort: 8080
+      name: http
+  type: ClusterIP

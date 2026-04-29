@@ -1,0 +1,213 @@
+version: "3.9"
+
+# ERP平台本地开发环境
+# 启动命令：docker-compose up -d
+# 包含：MySQL、Redis、RabbitMQ、Seata Server、SkyWalking OAP+UI、Doris（可选）
+
+services:
+  # ============================================================
+  # MySQL（各服务独立数据库，共享一个MySQL实例，生产环境分开）
+  # ============================================================
+  mysql:
+    image: mysql:8.0
+    container_name: erp-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: "Erp@123456"
+      MYSQL_CHARACTER_SET_SERVER: "utf8mb4"
+      MYSQL_COLLATION_SERVER: "utf8mb4_unicode_ci"
+      TZ: "Asia/Shanghai"
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./sql:/docker-entrypoint-initdb.d   # 自动执行初始化SQL
+    command:
+      - --default-authentication-plugin=mysql_native_password
+      - --max_connections=500
+      - --innodb_buffer_pool_size=512M
+      - --slow_query_log=1
+      - --long_query_time=2
+    networks:
+      - erp-net
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-pErp@123456"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ============================================================
+  # Redis（Session + 缓存）
+  # ============================================================
+  redis:
+    image: redis:7.2-alpine
+    container_name: erp-redis
+    command: redis-server --requirepass "Erp@redis2024" --maxmemory 512mb --maxmemory-policy allkeys-lru
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis_data:/data
+    networks:
+      - erp-net
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "Erp@redis2024", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 5
+
+  # ============================================================
+  # RabbitMQ（异步事件总线）
+  # ============================================================
+  rabbitmq:
+    image: rabbitmq:3.13-management-alpine
+    container_name: erp-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_USER: "erp"
+      RABBITMQ_DEFAULT_PASS: "Erp@rabbit2024"
+      RABBITMQ_DEFAULT_VHOST: "/"
+    ports:
+      - "5672:5672"    # AMQP
+      - "15672:15672"  # Management UI
+    volumes:
+      - rabbitmq_data:/var/lib/rabbitmq
+    networks:
+      - erp-net
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "ping"]
+      interval: 15s
+      timeout: 10s
+      retries: 5
+
+  # ============================================================
+  # Seata Server（分布式事务协调器，AT模式）
+  # ============================================================
+  seata-server:
+    image: seataio/seata-server:2.1.0
+    container_name: erp-seata
+    environment:
+      SEATA_PORT: 8091
+      SEATA_CONFIG_NAME: file:/root/seata-config/registry
+      JAVA_OPT: "-Xmx512m -Xms512m"
+    ports:
+      - "8091:8091"
+    volumes:
+      - ./seata-config:/root/seata-config
+    networks:
+      - erp-net
+    depends_on:
+      mysql:
+        condition: service_healthy
+
+  # ============================================================
+  # SkyWalking OAP（链路追踪服务端）
+  # ============================================================
+  skywalking-oap:
+    image: apache/skywalking-oap-server:9.6.0
+    container_name: erp-skywalking-oap
+    environment:
+      SW_STORAGE: h2  # 开发环境用H2，生产用ES
+      SW_CORE_PERIOD_METRIC_DATA_TTL: 7
+    ports:
+      - "11800:11800"  # gRPC（Agent上报）
+      - "12800:12800"  # REST
+    networks:
+      - erp-net
+    healthcheck:
+      test: ["CMD-SHELL", "curl -sf http://localhost:12800/internal/l7check || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # SkyWalking UI
+  skywalking-ui:
+    image: apache/skywalking-ui:9.6.0
+    container_name: erp-skywalking-ui
+    environment:
+      SW_OAP_ADDRESS: "http://skywalking-oap:12800"
+    ports:
+      - "8088:8080"
+    networks:
+      - erp-net
+    depends_on:
+      - skywalking-oap
+
+  # ============================================================
+  # Prometheus（指标采集）
+  # ============================================================
+  prometheus:
+    image: prom/prometheus:v2.51.0
+    container_name: erp-prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitor/prometheus.yml:/etc/prometheus/prometheus.yml
+      - prometheus_data:/prometheus
+    command:
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.retention.time=7d'
+    networks:
+      - erp-net
+
+  # ============================================================
+  # Grafana（可视化监控）
+  # ============================================================
+  grafana:
+    image: grafana/grafana:10.3.1
+    container_name: erp-grafana
+    environment:
+      GF_SECURITY_ADMIN_USER: admin
+      GF_SECURITY_ADMIN_PASSWORD: "Erp@grafana2024"
+      GF_USERS_ALLOW_SIGN_UP: "false"
+    ports:
+      - "3000:3000"
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./monitor/grafana/provisioning:/etc/grafana/provisioning
+    networks:
+      - erp-net
+    depends_on:
+      - prometheus
+
+  # ============================================================
+  # Canal Server（MySQL Binlog采集 → Kafka）
+  # ============================================================
+  zookeeper:
+    image: bitnami/zookeeper:3.9
+    container_name: erp-zookeeper
+    environment:
+      ALLOW_ANONYMOUS_LOGIN: "yes"
+    ports:
+      - "2181:2181"
+    networks:
+      - erp-net
+
+  kafka:
+    image: bitnami/kafka:3.7
+    container_name: erp-kafka
+    environment:
+      KAFKA_ZOOKEEPER_CONNECT: "zookeeper:2181"
+      KAFKA_LISTENERS: "PLAINTEXT://:9092"
+      KAFKA_ADVERTISED_LISTENERS: "PLAINTEXT://localhost:9092"
+      ALLOW_PLAINTEXT_LISTENER: "yes"
+    ports:
+      - "9092:9092"
+    volumes:
+      - kafka_data:/bitnami/kafka
+    networks:
+      - erp-net
+    depends_on:
+      - zookeeper
+
+volumes:
+  mysql_data:
+  redis_data:
+  rabbitmq_data:
+  prometheus_data:
+  grafana_data:
+  kafka_data:
+
+networks:
+  erp-net:
+    driver: bridge
+    ipam:
+      config:
+        - subnet: 172.20.0.0/16
