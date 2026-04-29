@@ -1,0 +1,15 @@
+# deploy/configmap/dev/infra.yml
+# K8s ConfigMap: erp-config-infra (dev namespace)
+# 挂载路径: /config/infra.yml
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:localhost}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 3000ms
+  rabbitmq:
+    host: ${RABBITMQ_HOST:localhost}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:erp}
+    password: ${RABBITMQ_PASSWORD:}

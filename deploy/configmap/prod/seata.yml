@@ -1,0 +1,11 @@
+# deploy/configmap/prod/seata.yml
+# K8s ConfigMap: erp-config-seata (prod namespace)
+# 挂载路径: /config/seata.yml
+seata:
+  enabled: true
+  registry:
+    type: file
+    file:
+      name: registry.conf
+  config:
+    type: file

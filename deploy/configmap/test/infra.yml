@@ -1,0 +1,14 @@
+# deploy/configmap/test/infra.yml
+# K8s ConfigMap: erp-config-infra (test namespace)
+spring:
+  data:
+    redis:
+      host: ${REDIS_HOST:redis-svc}
+      port: ${REDIS_PORT:6379}
+      password: ${REDIS_PASSWORD:}
+      timeout: 3000ms
+  rabbitmq:
+    host: ${RABBITMQ_HOST:rabbitmq-svc}
+    port: ${RABBITMQ_PORT:5672}
+    username: ${RABBITMQ_USERNAME:erp}
+    password: ${RABBITMQ_PASSWORD:}

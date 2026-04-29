@@ -3,6 +3,10 @@ spring:
     name: erp-report
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import:
+      - "optional:file:/config/infra.yml"
+      - "optional:file:/config/auth.yml"
   # 主数据源（Doris，查询专用）
   datasource:
     url: ${DORIS_URL:jdbc:mysql://localhost:9030/erp_dw?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai}
@@ -13,34 +17,13 @@ spring:
       maximum-pool-size: 10
       minimum-idle: 2
       read-only: true
-  data:
-    redis:
-      host: ${REDIS_HOST:localhost}
-      port: ${REDIS_PORT:6379}
-      password: ${REDIS_PASSWORD:}
 
 server:
   port: 8080
 
-sa-token:
-  token-name: Authorization
-  token-style: jwt-default
-  jwt-secret-key: ${SA_TOKEN_JWT_SECRET:erp-platform-secret-key-2024}
-  is-read-header: true
-  is-read-cookie: false
-
 mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: true
-
-management:
-  endpoints:
-    web:
-      exposure:
-        include: health,prometheus,info
+  type-aliases-package: com.erp.report.domain
 
 logging:
-  pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level [%X{SW_CTX}] %logger{36} - %msg%n"
   level:
     com.erp: DEBUG

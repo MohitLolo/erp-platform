@@ -1,0 +1,13 @@
+spring:
+  rabbitmq:
+    virtual-host: /
+    publisher-confirms: true
+    publisher-returns: true
+    listener:
+      simple:
+        acknowledge-mode: manual
+        prefetch: 10
+        retry:
+          enabled: true
+          max-attempts: 3
+          initial-interval: 1000ms

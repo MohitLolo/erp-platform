@@ -1,0 +1,12 @@
+# deploy/configmap/prod/auth.yml
+# K8s ConfigMap: erp-config-auth (prod namespace)
+sa-token:
+  token-name: Authorization
+  token-style: jwt-default
+  timeout: 43200
+  active-timeout: 1800
+  is-concurrent: false
+  is-share: true
+  is-read-header: true
+  is-read-cookie: false
+  jwt-secret-key: ${SA_TOKEN_JWT_SECRET:}

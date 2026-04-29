@@ -1,0 +1,13 @@
+# deploy/configmap/test/auth.yml
+# K8s ConfigMap: erp-config-auth (test namespace)
+# 挂载路径: /config/auth.yml
+sa-token:
+  token-name: Authorization
+  token-style: jwt-default
+  timeout: 86400
+  active-timeout: 1800
+  is-concurrent: false
+  is-share: true
+  is-read-header: true
+  is-read-cookie: false
+  jwt-secret-key: ${SA_TOKEN_JWT_SECRET:erp-platform-secret-key-2024}

@@ -1,0 +1,12 @@
+# deploy/configmap/dev/seata.yml
+# K8s ConfigMap: erp-config-seata (dev namespace)
+# 挂载路径: /config/seata.yml
+# 注意: tx-service-group 和 application-id 保留在各服务 application.yml 中
+seata:
+  enabled: true
+  registry:
+    type: file
+    file:
+      name: registry.conf
+  config:
+    type: file
