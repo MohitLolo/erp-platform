@@ -11,7 +11,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>erp-gateway</artifactId>
-    <name>ERP Gateway</name>
+    <name>erp-gateway</name>
 
     <dependencies>
         <!-- Gateway（WebFlux响应式，不能引入spring-boot-starter-web） -->
@@ -57,11 +57,7 @@
             <groupId>io.micrometer</groupId>
             <artifactId>micrometer-registry-prometheus</artifactId>
         </dependency>
-        <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-actuator</artifactId>
-        </dependency>
-    </dependencies>
+</dependencies>
 
     <build>
         <plugins>
