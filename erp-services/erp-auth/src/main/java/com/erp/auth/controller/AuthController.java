@@ -3,7 +3,7 @@ package com.erp.auth.controller;
 import com.erp.auth.dto.LoginRequest;
 import com.erp.auth.dto.LoginResponse;
 import com.erp.auth.service.AuthService;
-import com.erp.common.result.R;
+import com.erp.common.core.response.R;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;

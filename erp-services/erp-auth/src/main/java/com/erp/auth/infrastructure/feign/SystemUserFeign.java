@@ -1,6 +1,5 @@
 package com.erp.auth.infrastructure.feign;
 
-import com.erp.common.feign.FeignConfig;
 import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.Data;
 import org.springframework.cloud.openfeign.FeignClient;
@@ -13,7 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 @FeignClient(
         name = "erp-system",
         url = "${feign.system.url:http://erp-system:8080}",
-        configuration = FeignConfig.class
+        configuration = com.erp.common.web.feign.TtlFeignRequestInterceptor.class
 )
 public interface SystemUserFeign {
 

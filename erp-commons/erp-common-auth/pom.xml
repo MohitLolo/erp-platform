@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>erp-common-auth</artifactId>
-    <name>ERP Common Auth</name>
+    <name>erp-common-auth</name>
     <description>Sa-Token JWT 工具 / 鉴权注解</description>
 
     <dependencies>
@@ -30,6 +30,11 @@
         <dependency>
             <groupId>cn.dev33</groupId>
             <artifactId>sa-token-spring-boot3-starter</artifactId>
+        </dependency>
+        <!-- Sa-Token Redis Jackson 持久化 -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-redis-jackson</artifactId>
         </dependency>
     </dependencies>
 </project>

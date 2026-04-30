@@ -15,8 +15,8 @@
     <artifactId>erp-services</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>ERP Services Parent</name>
-    <description>业务服务父 POM（仅打 Docker 镜像，不发布 jar）</description>
+    <name>erp-services</name>
+    <description>业务服务聚合父模块（仅用于构建服务镜像）</description>
 
     <modules>
         <module>erp-gateway</module>

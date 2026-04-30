@@ -1,8 +1,8 @@
 package com.erp.system.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.erp.common.result.R;
-import com.erp.common.tenant.TenantContextHolder;
+import com.erp.common.core.response.R;
+import com.erp.common.core.context.TenantContextHolder;
 import com.erp.system.application.service.UserService;
 import com.erp.system.domain.entity.SysUser;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,7 @@
 package com.erp.finance.application.service;
 
-import com.erp.common.exception.BizException;
+import com.erp.common.core.exception.BizException;
+import com.erp.common.core.response.ResultCode;
 import com.erp.finance.domain.entity.Receivable;
 import com.erp.finance.infrastructure.mapper.ReceivableMapper;
 import lombok.RequiredArgsConstructor;
@@ -65,15 +66,15 @@ public class ReceivableService {
     public void recordReceipt(Long receivableId, BigDecimal receiptAmount) {
         Receivable receivable = receivableMapper.selectById(receivableId);
         if (receivable == null) {
-            throw new BizException("应收款不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "应收款不存在");
         }
         if ("SETTLED".equals(receivable.getStatus())) {
-            throw new BizException("应收款已结清");
+            throw new BizException(ResultCode.BIZ_ERROR, "应收款已结清");
         }
 
         BigDecimal newReceived = receivable.getReceivedAmount().add(receiptAmount);
         if (newReceived.compareTo(receivable.getAmount()) > 0) {
-            throw new BizException("收款金额超过应收金额");
+            throw new BizException(ResultCode.BIZ_ERROR, "收款金额超过应收金额");
         }
 
         receivable.setReceivedAmount(newReceived);

@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>erp-common-mq</artifactId>
-    <name>ERP Common MQ</name>
+    <name>erp-common-mq</name>
     <description>RabbitMQ 事件基类 / 发布工具</description>
 
     <dependencies>

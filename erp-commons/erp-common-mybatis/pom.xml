@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>erp-common-mybatis</artifactId>
-    <name>ERP Common MyBatis</name>
+    <name>erp-common-mybatis</name>
     <description>MyBatis-Plus 配置 / 自动填充 / 多租户插件</description>
 
     <dependencies>

@@ -16,8 +16,8 @@
     <artifactId>erp-apis</artifactId>
     <version>1.0.0-SNAPSHOT</version>
     <packaging>pom</packaging>
-    <name>ERP APIs Parent</name>
-    <description>服务间 API 模块父 POM（独立版本，发布到 Maven 私服）</description>
+    <name>erp-apis</name>
+    <description>服务间 API 聚合父模块（可独立发布）</description>
 
     <modules>
         <module>erp-api-system</module>

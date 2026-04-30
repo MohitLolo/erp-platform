@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>erp-common-core</artifactId>
-    <name>ERP Common Core</name>
+    <name>erp-common-core</name>
     <description>统一响应/异常/常量/TTL上下文</description>
 
     <dependencies>

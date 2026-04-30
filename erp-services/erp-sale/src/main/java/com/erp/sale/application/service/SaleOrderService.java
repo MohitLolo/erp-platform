@@ -104,7 +104,7 @@ public class SaleOrderService {
 
         R<Long> receivableResult = financeFeignClient.createReceivable(receivableReq);
         if (receivableResult == null || receivableResult.getData() == null) {
-            throw new BizException("创建应收款失败");
+            throw new BizException(ResultCode.BIZ_ERROR, "创建应收款失败");
         }
         log.info("[Seata] Receivable created: orderNo={}, receivableId={}", order.getOrderNo(), receivableResult.getData());
 
@@ -123,7 +123,7 @@ public class SaleOrderService {
     public SaleOrder getOrderDetail(Long orderId) {
         SaleOrder order = saleOrderMapper.selectById(orderId);
         if (order == null) {
-            throw new BizException("订单不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "订单不存在");
         }
         List<SaleOrderItem> items = saleOrderItemMapper.findByOrderId(orderId);
         order.setItems(items);
@@ -137,10 +137,10 @@ public class SaleOrderService {
     public void cancelOrder(Long orderId) {
         SaleOrder order = saleOrderMapper.selectById(orderId);
         if (order == null) {
-            throw new BizException("订单不存在");
+            throw new BizException(ResultCode.NOT_FOUND, "订单不存在");
         }
         if (!"CONFIRMED".equals(order.getStatus()) && !"DRAFT".equals(order.getStatus())) {
-            throw new BizException("当前状态不允许取消: " + order.getStatus());
+            throw new BizException(ResultCode.BIZ_ERROR, "当前状态不允许取消: " + order.getStatus());
         }
 
         order.setStatus("CANCELLED");

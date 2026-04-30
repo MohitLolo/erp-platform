@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>erp-api-system</artifactId>
-    <name>ERP API System</name>
+    <name>erp-api-system</name>
     <description>系统服务对外 Feign 接口 + DTO（仅接口，不含业务逻辑）</description>
 
     <dependencies>

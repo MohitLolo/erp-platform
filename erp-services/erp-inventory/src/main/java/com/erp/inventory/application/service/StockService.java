@@ -1,8 +1,8 @@
 package com.erp.inventory.application.service;
 
-import com.erp.common.exception.BizException;
-import com.erp.common.result.ResultCode;
-import com.erp.common.tenant.TenantContextHolder;
+import com.erp.common.core.exception.BizException;
+import com.erp.common.core.response.ResultCode;
+import com.erp.common.core.context.TenantContextHolder;
 import com.erp.inventory.domain.entity.StockInfo;
 import com.erp.inventory.domain.entity.StockLock;
 import com.erp.inventory.infrastructure.mapper.StockInfoMapper;
@@ -86,7 +86,7 @@ public class StockService {
             // 乐观锁冲突，重试
             log.warn("Optimistic lock conflict, retry {}/{}: materialId={}", i + 1, MAX_RETRY, materialId);
         }
-        throw new BizException("库存锁定失败，并发冲突，请重试");
+        throw new BizException(ResultCode.BIZ_ERROR, "库存锁定失败，并发冲突，请重试");
     }
 
     /**
@@ -117,7 +117,7 @@ public class StockService {
                 return true;
             }
         }
-        throw new BizException("库存解锁失败，并发冲突，请重试");
+        throw new BizException(ResultCode.BIZ_ERROR, "库存解锁失败，并发冲突，请重试");
     }
 
     /**
@@ -126,8 +126,8 @@ public class StockService {
     @Transactional(rollbackFor = Exception.class)
     public boolean lockStockBatch(List<LockStockCmd> cmds) {
         for (LockStockCmd cmd : cmds) {
-            lockStock(cmd.getWarehouseId(), cmd.getMaterialId(),
-                    cmd.getQuantity(), cmd.getBizNo(), cmd.getTenantId());
+            lockStock(cmd.warehouseId(), cmd.materialId(),
+                    cmd.quantity(), cmd.bizNo(), cmd.tenantId());
         }
         return true;
     }
@@ -139,10 +139,27 @@ public class StockService {
     public boolean unlockStockBatch(List<LockStockCmd> cmds) {
         String tenantId = TenantContextHolder.getTenantId();
         for (LockStockCmd cmd : cmds) {
-            unlockStock(cmd.getWarehouseId(), cmd.getMaterialId(),
-                    cmd.getQuantity(), cmd.getBizNo(), tenantId);
+            unlockStock(cmd.warehouseId(), cmd.materialId(),
+                    cmd.quantity(), cmd.bizNo(), tenantId);
         }
         return true;
+    }
+
+    /**
+     * 兼容异步消费者的旧调用名称
+     */
+    @Transactional(rollbackFor = Exception.class)
+    public boolean batchLockStock(List<com.erp.inventory.domain.entity.StockLockRequest> requests) {
+        List<LockStockCmd> cmds = requests.stream()
+                .map(r -> new LockStockCmd(
+                        r.getWarehouseId(),
+                        r.getMaterialId(),
+                        r.getQuantity(),
+                        r.getBizNo(),
+                        r.getTenantId()
+                ))
+                .toList();
+        return lockStockBatch(cmds);
     }
 
     /**

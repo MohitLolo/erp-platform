@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>erp-common-redis</artifactId>
-    <name>ERP Common Redis</name>
+    <name>erp-common-redis</name>
     <description>Redis + Redisson 封装（分布式锁/限流/布隆过滤器/延迟队列）</description>
 
     <dependencies>

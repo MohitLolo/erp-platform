@@ -1,7 +1,7 @@
 package com.erp.purchase.domain.entity;
 
 import com.baomidou.mybatisplus.annotation.TableName;
-import com.erp.common.entity.BaseEntity;
+import com.erp.common.core.entity.BaseEntity;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
 

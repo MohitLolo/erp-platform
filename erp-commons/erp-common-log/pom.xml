@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>erp-common-log</artifactId>
-    <name>ERP Common Log</name>
+    <name>erp-common-log</name>
     <description>MDC + SkyWalking TraceId 日志增强</description>
 
     <dependencies>

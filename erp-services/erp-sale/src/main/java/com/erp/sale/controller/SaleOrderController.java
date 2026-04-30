@@ -1,7 +1,7 @@
 package com.erp.sale.controller;
 
 import cn.dev33.satoken.annotation.SaCheckPermission;
-import com.erp.common.result.R;
+import com.erp.common.core.response.R;
 import com.erp.sale.application.service.SaleOrderService;
 import com.erp.sale.domain.entity.SaleOrder;
 import lombok.RequiredArgsConstructor;

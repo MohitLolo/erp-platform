@@ -1,7 +1,8 @@
 package com.erp.system.application.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.erp.common.exception.BizException;
+import com.erp.common.core.exception.BizException;
+import com.erp.common.core.response.ResultCode;
 import com.erp.system.domain.entity.SysTenant;
 import com.erp.system.domain.entity.SysUser;
 import com.erp.system.infrastructure.mapper.SysPermissionMapper;
@@ -35,7 +36,7 @@ public class UserService {
             return null;
         }
         if (user.getStatus() != 1) {
-            throw new BizException("账号已被禁用");
+            throw new BizException(ResultCode.ACCOUNT_DISABLED);
         }
         return user;
     }

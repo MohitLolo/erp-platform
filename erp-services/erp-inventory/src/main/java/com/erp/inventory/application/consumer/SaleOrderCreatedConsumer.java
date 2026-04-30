@@ -62,7 +62,7 @@ public class SaleOrderCreatedConsumer {
             channel.basicAck(deliveryTag, false);
             log.info("[库存消费] 库存预占成功, eventId={}, orderId={}", eventId, event.getOrderId());
 
-        } catch (com.erp.common.exception.BizException e) {
+        } catch (com.erp.common.core.exception.BizException e) {
             // 业务异常：幂等重复 / 库存不足（异步方案需要补偿）
             log.warn("[库存消费] 业务异常，丢弃消息: eventId={}, error={}", eventId, e.getMessage());
             // false = 不重新入队；业务层已处理幂等或需要业务补偿

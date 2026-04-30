@@ -1,6 +1,6 @@
 package com.erp.inventory.controller;
 
-import com.erp.common.result.R;
+import com.erp.common.core.response.R;
 import com.erp.inventory.application.service.StockService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

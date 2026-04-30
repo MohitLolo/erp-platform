@@ -1,6 +1,6 @@
 package com.erp.gateway.filter;
 
-import com.erp.common.constants.HeaderConstants;
+import com.erp.common.core.constant.HeaderConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.cloud.gateway.filter.GlobalFilter;

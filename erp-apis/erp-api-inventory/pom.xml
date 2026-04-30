@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>erp-api-inventory</artifactId>
-    <name>ERP API Inventory</name>
+    <name>erp-api-inventory</name>
     <description>库存服务对外 Feign 接口 + DTO（仅接口，不含业务逻辑）</description>
 
     <dependencies>

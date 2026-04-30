@@ -1,7 +1,7 @@
 package com.erp.common.core.context;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
-import com.alibaba.ttl.TtlExecutors;
+import com.alibaba.ttl.threadpool.TtlExecutors;
 
 import java.util.concurrent.ExecutorService;
 

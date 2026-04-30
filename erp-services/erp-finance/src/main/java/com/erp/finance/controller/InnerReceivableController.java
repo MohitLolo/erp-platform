@@ -1,6 +1,6 @@
 package com.erp.finance.controller;
 
-import com.erp.common.result.R;
+import com.erp.common.core.response.R;
 import com.erp.finance.application.service.ReceivableService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;

@@ -1,6 +1,6 @@
 package com.erp.system.controller;
 
-import com.erp.common.result.R;
+import com.erp.common.core.response.R;
 import com.erp.system.application.service.UserService;
 import com.erp.system.domain.entity.SysUser;
 import lombok.RequiredArgsConstructor;

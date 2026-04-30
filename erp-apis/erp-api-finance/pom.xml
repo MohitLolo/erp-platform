@@ -13,7 +13,7 @@
     </parent>
 
     <artifactId>erp-api-finance</artifactId>
-    <name>ERP API Finance</name>
+    <name>erp-api-finance</name>
     <description>财务服务对外 Feign 接口 + DTO（仅接口，不含业务逻辑）</description>
 
     <dependencies>

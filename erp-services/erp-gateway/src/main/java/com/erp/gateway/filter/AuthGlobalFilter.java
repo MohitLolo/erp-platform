@@ -3,7 +3,7 @@ package com.erp.gateway.filter;
 import cn.dev33.satoken.exception.SaTokenException;
 import cn.dev33.satoken.reactor.context.SaReactorSyncHolder;
 import cn.dev33.satoken.stp.StpUtil;
-import com.erp.common.constants.HeaderConstants;
+import com.erp.common.core.constant.HeaderConstants;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
