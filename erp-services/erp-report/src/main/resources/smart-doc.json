@@ -3,7 +3,7 @@
   "pathPrefix": "",
   "isStrict": false,
   "allInOne": true,
-  "outPath": "src/main/resources/static/doc",
+  "outPath": "target/doc",
   "coverOld": true,
   "style": "xt256",
   "createDebugPage": false,
