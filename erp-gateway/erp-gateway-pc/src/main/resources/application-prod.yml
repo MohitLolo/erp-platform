@@ -1,0 +1,118 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        # 认证服务
+        - id: erp-auth
+          uri: http://erp-auth.erp-prod.svc.cluster.local:8080
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
+
+        # 系统服务
+        - id: erp-system
+          uri: http://erp-system.erp-prod.svc.cluster.local:8080
+          predicates:
+            - Path=/api/system/**
+          filters:
+            - StripPrefix=1
+
+        # 基础数据服务
+        - id: erp-base
+          uri: http://erp-base.erp-prod.svc.cluster.local:8080
+          predicates:
+            - Path=/api/base/**
+          filters:
+            - StripPrefix=1
+
+        # 采购服务
+        - id: erp-purchase
+          uri: http://erp-purchase.erp-prod.svc.cluster.local:8080
+          predicates:
+            - Path=/api/purchase/**
+          filters:
+            - StripPrefix=1
+
+        # 销售服务（正式版本 v1）
+        - id: erp-sale
+          uri: http://erp-sale.erp-prod.svc.cluster.local:8080
+          predicates:
+            - Path=/api/sale/**
+          filters:
+            - StripPrefix=1
+
+        # 销售服务（灰度版本 v2，由 GrayRoutingFilter 动态路由）
+        - id: erp-sale-gray
+          uri: http://erp-sale-v2.erp-prod.svc.cluster.local:8080
+          predicates:
+            - Path=/api/sale/**
+            - Header=X-Gray-Tag, v2
+          filters:
+            - StripPrefix=1
+
+        # 库存服务
+        - id: erp-inventory
+          uri: http://erp-inventory.erp-prod.svc.cluster.local:8080
+          predicates:
+            - Path=/api/inventory/**
+          filters:
+            - StripPrefix=1
+
+        # 财务服务
+        - id: erp-finance
+          uri: http://erp-finance.erp-prod.svc.cluster.local:8080
+          predicates:
+            - Path=/api/finance/**
+          filters:
+            - StripPrefix=1
+
+        # 生产服务
+        - id: erp-production
+          uri: http://erp-production.erp-prod.svc.cluster.local:8080
+          predicates:
+            - Path=/api/production/**
+          filters:
+            - StripPrefix=1
+
+        # 报表服务
+        - id: erp-report
+          uri: http://erp-report.erp-prod.svc.cluster.local:8080
+          predicates:
+            - Path=/api/report/**
+          filters:
+            - StripPrefix=1
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns:
+              - "https://*.erp.com"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+
+      # 生产环境限流配置
+      default-filters:
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 100
+            redis-rate-limiter.burstCapacity: 200
+            redis-rate-limiter.requestedTokens: 1
+
+gateway:
+  auth:
+    whitelist:
+      - /api/auth/login
+      - /api/auth/refresh
+      - /actuator/health
+      - /actuator/prometheus

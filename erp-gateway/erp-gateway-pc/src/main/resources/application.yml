@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: erp-gateway-pc
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  config:
+    import:
+      - "optional:file:/config/infra.yml"
+      - "optional:file:/config/auth.yml"
+
+server:
+  port: 9000
+
+# 暴露网关端点（供 Prometheus 抓取 + K8s 存活探针）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,prometheus,info,gateway
+
+logging:
+  level:
+    com.erp: DEBUG
+    org.springframework.cloud.gateway: INFO

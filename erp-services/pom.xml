@@ -19,7 +19,6 @@
     <description>业务服务聚合父模块（仅用于构建服务镜像）</description>
 
     <modules>
-        <module>erp-gateway</module>
         <module>erp-auth</module>
         <module>erp-system</module>
         <module>erp-base</module>

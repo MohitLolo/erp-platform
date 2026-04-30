@@ -1,0 +1,75 @@
+spring:
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+      routes:
+        # 认证服务
+        - id: erp-auth
+          uri: http://erp-auth:8080
+          predicates:
+            - Path=/api/auth/**
+          filters:
+            - StripPrefix=1
+
+        # 系统服务
+        - id: erp-system
+          uri: http://erp-system:8080
+          predicates:
+            - Path=/api/system/**
+          filters:
+            - StripPrefix=1
+
+        # 基础数据服务
+        - id: erp-base
+          uri: http://erp-base:8080
+          predicates:
+            - Path=/api/base/**
+          filters:
+            - StripPrefix=1
+
+        # 采购服务
+        - id: erp-purchase
+          uri: http://erp-purchase:8080
+          predicates:
+            - Path=/api/purchase/**
+          filters:
+            - StripPrefix=1
+
+        # 销售服务
+        - id: erp-sale
+          uri: http://erp-sale:8080
+          predicates:
+            - Path=/api/sale/**
+          filters:
+            - StripPrefix=1
+
+        # 库存服务
+        - id: erp-inventory
+          uri: http://erp-inventory:8080
+          predicates:
+            - Path=/api/inventory/**
+          filters:
+            - StripPrefix=1
+
+      globalcors:
+        cors-configurations:
+          '[/**]':
+            allowedOriginPatterns: "*"
+            allowedMethods:
+              - GET
+              - POST
+              - PUT
+              - DELETE
+              - OPTIONS
+            allowedHeaders: "*"
+            allowCredentials: true
+            maxAge: 3600
+
+gateway:
+  auth:
+    whitelist:
+      - /api/auth/login
+      - /api/auth/refresh
+      - /actuator/**
