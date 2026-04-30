@@ -27,7 +27,8 @@ public class StpInterfaceImpl implements StpInterface {
         if (session == null) {
             return List.of();
         }
-        List<String> perms = session.get("permissions");
+        @SuppressWarnings("unchecked")
+        List<String> perms = (List<String>) session.get("permissions");
         return perms != null ? perms : List.of();
     }
 
@@ -37,7 +38,8 @@ public class StpInterfaceImpl implements StpInterface {
         if (session == null) {
             return List.of();
         }
-        List<String> roles = session.get("roles");
+        @SuppressWarnings("unchecked")
+        List<String> roles = (List<String>) session.get("roles");
         return roles != null ? roles : List.of();
     }
 }
