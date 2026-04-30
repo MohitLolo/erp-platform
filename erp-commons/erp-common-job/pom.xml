@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0
+         http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.erp.commons</groupId>
+        <artifactId>erp-commons</artifactId>
+        <version>1.0.0-SNAPSHOT</version>
+        <relativePath>../pom.xml</relativePath>
+    </parent>
+
+    <artifactId>erp-common-job</artifactId>
+    <name>erp-common-job</name>
+    <description>XXL-JOB 薄封装（依赖收口 + 自动配置），按需引入，不可独立运行</description>
+
+    <dependencies>
+        <!-- XXL-JOB 核心 -->
+        <dependency>
+            <groupId>com.xuxueli</groupId>
+            <artifactId>xxl-job-core</artifactId>
+        </dependency>
+        <!-- 公共 core（常量、上下文等） -->
+        <dependency>
+            <groupId>com.erp.commons</groupId>
+            <artifactId>erp-common-core</artifactId>
+        </dependency>
+        <!-- Spring Boot AutoConfiguration（@ConditionalOnProperty, @AutoConfiguration 等） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-autoconfigure</artifactId>
+        </dependency>
+    </dependencies>
+</project>

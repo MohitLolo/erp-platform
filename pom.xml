@@ -49,6 +49,8 @@
         <!-- 工具 -->
         <hutool.version>5.8.26</hutool.version>
         <mapstruct.version>1.5.5.Final</mapstruct.version>
+        <!-- 分布式定时任务 -->
+        <xxl-job.version>2.4.1</xxl-job.version>
         <lombok.version>1.18.32</lombok.version>
         <!-- 链路追踪 -->
         <skywalking.version>9.3.0</skywalking.version>
@@ -107,6 +109,11 @@
             <dependency>
                 <groupId>com.erp.commons</groupId>
                 <artifactId>erp-common-web</artifactId>
+                <version>1.0.0-SNAPSHOT</version>
+            </dependency>
+            <dependency>
+                <groupId>com.erp.commons</groupId>
+                <artifactId>erp-common-job</artifactId>
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
 
@@ -228,6 +235,13 @@
                 <groupId>org.mapstruct</groupId>
                 <artifactId>mapstruct-processor</artifactId>
                 <version>${mapstruct.version}</version>
+            </dependency>
+
+            <!-- ===== XXL-JOB ===== -->
+            <dependency>
+                <groupId>com.xuxueli</groupId>
+                <artifactId>xxl-job-core</artifactId>
+                <version>${xxl-job.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

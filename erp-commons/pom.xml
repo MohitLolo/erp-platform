@@ -27,5 +27,6 @@
         <module>erp-common-mybatis</module>
         <module>erp-common-mq</module>
         <module>erp-common-web</module>
+        <module>erp-common-job</module>
     </modules>
 </project>
