@@ -2,10 +2,15 @@ package com.erp.common.job.config;
 
 import com.xxl.job.core.executor.impl.XxlJobSpringExecutor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.util.StringUtils;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import java.net.Inet4Address;
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.util.Enumeration;
 
 /**
  * XXL-JOB Executor 自动配置
@@ -66,14 +71,73 @@ public class XxlJobConfig {
         executor.setAdminAddresses(adminAddresses);
         executor.setAccessToken(accessToken);
         executor.setAppname(appname);
-        executor.setAddress(address);
-        executor.setIp(ip);
+        if (StringUtils.hasText(address)) {
+            executor.setAddress(address);
+        }
+
+        String resolvedIp = resolveExecutorIp();
+        if (StringUtils.hasText(resolvedIp)) {
+            executor.setIp(resolvedIp);
+        }
         executor.setPort(port);
         executor.setLogPath(logPath);
         executor.setLogRetentionDays(logRetentionDays);
 
-        log.info("XXL-JOB Executor initialized: appname={}, port={}, admin={}",
-                appname, port, adminAddresses);
+        log.info("XXL-JOB Executor initialized: appname={}, ip={}, port={}, admin={}",
+                appname, resolvedIp, port, adminAddresses);
         return executor;
+    }
+
+    private String resolveExecutorIp() {
+        if (StringUtils.hasText(ip)) {
+            return ip.trim();
+        }
+
+        String podIp = System.getenv("POD_IP");
+        if (isUsableIp(podIp)) {
+            return podIp.trim();
+        }
+
+        String hostIp = System.getenv("HOST_IP");
+        if (isUsableIp(hostIp)) {
+            return hostIp.trim();
+        }
+
+        String localIp = findFirstSiteLocalIpv4();
+        if (StringUtils.hasText(localIp)) {
+            return localIp;
+        }
+
+        return null;
+    }
+
+    private boolean isUsableIp(String candidate) {
+        if (!StringUtils.hasText(candidate)) {
+            return false;
+        }
+        String ipValue = candidate.trim();
+        return !"127.0.0.1".equals(ipValue) && !"0.0.0.0".equals(ipValue);
+    }
+
+    private String findFirstSiteLocalIpv4() {
+        try {
+            Enumeration<NetworkInterface> interfaces = NetworkInterface.getNetworkInterfaces();
+            while (interfaces != null && interfaces.hasMoreElements()) {
+                NetworkInterface networkInterface = interfaces.nextElement();
+                if (!networkInterface.isUp() || networkInterface.isLoopback() || networkInterface.isVirtual()) {
+                    continue;
+                }
+                Enumeration<InetAddress> addresses = networkInterface.getInetAddresses();
+                while (addresses.hasMoreElements()) {
+                    InetAddress addr = addresses.nextElement();
+                    if (addr instanceof Inet4Address && !addr.isLoopbackAddress() && addr.isSiteLocalAddress()) {
+                        return addr.getHostAddress();
+                    }
+                }
+            }
+        } catch (Exception ex) {
+            log.warn("Resolve XXL-JOB executor ip failed, fallback to framework default behavior", ex);
+        }
+        return null;
     }
 }

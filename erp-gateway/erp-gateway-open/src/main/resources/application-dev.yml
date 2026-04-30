@@ -4,6 +4,11 @@ spring:
       discovery:
         locator:
           enabled: false
+      default-filters:
+        - RemoveRequestHeader=X-User-Id
+        - RemoveRequestHeader=X-Tenant-Id
+        - RemoveRequestHeader=X-User-Name
+        - RemoveRequestHeader=X-Inner-Call
       routes:
         # 开放接口：认证（API Key 模式）
         - id: erp-auth-open

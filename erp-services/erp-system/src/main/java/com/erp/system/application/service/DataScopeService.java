@@ -1,6 +1,7 @@
 package com.erp.system.application.service;
 
 import com.erp.common.mybatis.datascope.DataScopeContext;
+import com.erp.common.mybatis.datascope.DataScopeLevel;
 import com.erp.system.domain.entity.SysDept;
 import com.erp.system.domain.entity.SysRole;
 import com.erp.system.domain.entity.SysUser;
@@ -61,7 +62,7 @@ public class DataScopeService {
         List<SysRole> roles = roleMapper.findRolesByUserId(user.getId());
         if (roles == null || roles.isEmpty()) {
             // 没有角色，默认仅本人数据
-            cacheContext(user.getTenantId(), user.getId(), buildContext(4, user, List.of()));
+            cacheContext(user.getTenantId(), user.getId(), buildContext(DataScopeLevel.SELF, user, List.of()));
             return;
         }
 
@@ -70,9 +71,13 @@ public class DataScopeService {
                 .filter(r -> r.getDataScope() != null)
                 .mapToInt(SysRole::getDataScope)
                 .min()
-                .orElse(4);
+                .orElse(DataScopeLevel.SELF.code());
 
-        DataScopeContext ctx = buildContext(minScope, user, roles);
+        DataScopeLevel scopeLevel = DataScopeLevel.fromCode(minScope);
+        if (scopeLevel == null) {
+            scopeLevel = DataScopeLevel.SELF;
+        }
+        DataScopeContext ctx = buildContext(scopeLevel, user, roles);
         cacheContext(user.getTenantId(), user.getId(), ctx);
     }
 
@@ -88,38 +93,38 @@ public class DataScopeService {
     // private helpers
     // -------------------------------------------------------------------------
 
-    private DataScopeContext buildContext(int scope, SysUser user, List<SysRole> roles) {
+    private DataScopeContext buildContext(DataScopeLevel scopeLevel, SysUser user, List<SysRole> roles) {
         DataScopeContext ctx = new DataScopeContext();
-        ctx.setDataScope(scope);
+        ctx.setDataScope(scopeLevel.code());
         ctx.setUserId(user.getId());
         ctx.setPrimaryDeptId(user.getDeptId());
 
         Set<Long> deptIds = new HashSet<>();
 
-        switch (scope) {
-            case 1:
+        switch (scopeLevel) {
+            case ALL:
                 // 全部数据，deptIds 为空（handler 不注入条件）
                 break;
-            case 2:
+            case DEPT:
                 // 本部门
                 if (user.getDeptId() != null) {
                     deptIds.add(user.getDeptId());
                 }
                 break;
-            case 3:
+            case DEPT_AND_CHILD:
                 // 本部门及下级
                 if (user.getDeptId() != null) {
                     List<Long> subIds = deptMapper.findSubDeptIds(user.getDeptId());
                     deptIds.addAll(subIds);
                 }
                 break;
-            case 4:
+            case SELF:
                 // 仅本人，deptIds 无意义，handler 用 userId 过滤
                 break;
-            case 5:
+            case CUSTOM_DEPT:
                 // 自定义：union 所有角色中 scope=5 的 role_dept
                 for (SysRole role : roles) {
-                    if (role.getDataScope() != null && role.getDataScope() == 5) {
+                    if (DataScopeLevel.fromCode(role.getDataScope()) == DataScopeLevel.CUSTOM_DEPT) {
                         List<Long> roleDeptIds = roleDeptMapper.findDeptIdsByRoleId(role.getId());
                         deptIds.addAll(roleDeptIds);
                     }

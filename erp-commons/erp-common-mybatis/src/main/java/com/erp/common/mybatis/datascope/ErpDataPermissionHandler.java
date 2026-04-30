@@ -12,7 +12,9 @@ import net.sf.jsqlparser.schema.Column;
 
 import java.lang.reflect.Method;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
 /**
@@ -23,14 +25,14 @@ import java.util.stream.Collectors;
  *
  * <p>逻辑：
  * <ul>
- *   <li>scope=1 → 全部数据，不注入任何条件</li>
- *   <li>scope=2/3/5 → {@code {deptAlias}.dept_id IN (deptIds)}</li>
- *   <li>scope=4 → {@code {userAlias}.create_by = userId}</li>
+ *   <li>ALL → 全部数据，不注入任何条件</li>
+ *   <li>DEPT/DEPT_AND_CHILD/CUSTOM_DEPT → {@code {deptAlias}.dept_id IN (deptIds)}</li>
+ *   <li>SELF → {@code {userAlias}.create_by = userId}</li>
  * </ul>
  *
  * <p>降级规则：
  * <ul>
- *   <li>deptAlias 为空但 scope=2/3/5 → 使用 userAlias.create_by 过滤</li>
+ *   <li>deptAlias 为空但部门维度范围 → 使用 userAlias.create_by 过滤</li>
  *   <li>DataScopeContext 为 null → 不注入任何条件（内部调用/未登录豁免）</li>
  * </ul>
  *
@@ -38,6 +40,7 @@ import java.util.stream.Collectors;
  * @since 1.0.0
  */
 public class ErpDataPermissionHandler implements DataPermissionHandler {
+    private final Map<String, DataScope> annotationCache = new ConcurrentHashMap<>();
 
     @Override
     public Expression getSqlSegment(Expression where, String mappedStatementId) {
@@ -48,18 +51,18 @@ public class ErpDataPermissionHandler implements DataPermissionHandler {
         }
 
         // 反射查找对应 Mapper 方法上的 @DataScope 注解
-        DataScope annotation = findAnnotation(mappedStatementId);
+        DataScope annotation = annotationCache.computeIfAbsent(mappedStatementId, this::findAnnotation);
         if (annotation == null) {
             return where;
         }
 
-        Integer scope = ctx.getDataScope();
-        if (scope == null || scope == 1) {
+        DataScopeLevel scopeLevel = ctx.getDataScopeLevel();
+        if (scopeLevel == null || scopeLevel == DataScopeLevel.ALL) {
             // 全部数据权限，不过滤
             return where;
         }
 
-        Expression dataScopeExpr = buildExpression(scope, ctx, annotation);
+        Expression dataScopeExpr = buildExpression(scopeLevel, ctx, annotation);
         if (dataScopeExpr == null) {
             return where;
         }
@@ -70,14 +73,14 @@ public class ErpDataPermissionHandler implements DataPermissionHandler {
     /**
      * 根据 scope 和注解信息构建过滤表达式
      */
-    private Expression buildExpression(Integer scope, DataScopeContext ctx, DataScope annotation) {
+    private Expression buildExpression(DataScopeLevel scopeLevel, DataScopeContext ctx, DataScope annotation) {
         String deptAlias = annotation.deptAlias();
         String userAlias = annotation.userAlias();
 
-        switch (scope) {
-            case 2:
-            case 3:
-            case 5: {
+        switch (scopeLevel) {
+            case DEPT:
+            case DEPT_AND_CHILD:
+            case CUSTOM_DEPT: {
                 Set<Long> deptIds = ctx.getDeptIds();
                 if (deptAlias != null && !deptAlias.isBlank() && deptIds != null && !deptIds.isEmpty()) {
                     return buildInExpression(deptAlias + ".dept_id", deptIds);
@@ -88,7 +91,7 @@ public class ErpDataPermissionHandler implements DataPermissionHandler {
                 }
                 return null;
             }
-            case 4: {
+            case SELF: {
                 if (userAlias != null && !userAlias.isBlank() && ctx.getUserId() != null) {
                     return buildEqualsExpression(userAlias + ".create_by", ctx.getUserId());
                 }

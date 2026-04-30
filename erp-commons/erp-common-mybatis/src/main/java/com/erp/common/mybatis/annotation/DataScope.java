@@ -11,9 +11,9 @@ import java.lang.annotation.*;
  * List&lt;SaleOrder&gt; selectPageByQuery(@Param("query") SaleOrderQuery query);
  * </pre>
  *
- * <p>当 {@code deptAlias} 不为空且数据权限维度为部门类（scope=2/3/5）时，
+ * <p>当 {@code deptAlias} 不为空且数据权限维度为部门类（DEPT/DEPT_AND_CHILD/CUSTOM_DEPT）时，
  * 拦截器自动注入 {@code {deptAlias}.dept_id IN (...)} 条件。
- * <br>当 {@code userAlias} 不为空且 scope=4 时，注入 {@code {userAlias}.create_by = userId}。
+ * <br>当 {@code userAlias} 不为空且权限为 SELF 时，注入 {@code {userAlias}.create_by = userId}。
  *
  * @author erp
  * @since 1.0.0

@@ -1,8 +1,6 @@
 package com.erp.gateway.common.config;
 
 import cn.dev33.satoken.reactor.filter.SaReactorFilter;
-import cn.dev33.satoken.router.SaRouter;
-import cn.dev33.satoken.stp.StpUtil;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -28,8 +26,6 @@ public class SaTokenConfig {
                 .addInclude("/**")
                 // 白名单（无需登录）
                 .addExclude("/api/auth/login", "/api/auth/refresh", "/actuator/**")
-                // 鉴权方法（仅校验登录状态，角色权限控制交给各业务服务）
-                .setAuth(obj -> SaRouter.match("/**").check(r -> StpUtil.checkLogin()))
                 // 异常处理
                 .setError(e -> "{\"code\":401,\"msg\":\"" + e.getMessage() + "\",\"data\":null}");
     }

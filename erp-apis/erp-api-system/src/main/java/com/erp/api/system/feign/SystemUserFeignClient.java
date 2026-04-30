@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.PathVariable;
  */
 @FeignClient(
         name = "erp-system",
-        url = "${feign.system.url:http://erp-system.erp-prod.svc.cluster.local:8080}"
+        url = "${feign.system.url:http://erp-system:8080}"
 )
 public interface SystemUserFeignClient {
 

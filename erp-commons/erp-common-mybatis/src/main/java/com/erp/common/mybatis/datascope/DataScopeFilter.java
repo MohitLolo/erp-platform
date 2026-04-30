@@ -21,10 +21,6 @@ import java.io.IOException;
  * <p>在每次请求开始时，从 Redis 中加载当前用户的 {@link DataScopeContext}，
  * 存入 {@link DataScopeContextHolder}；请求结束后在 finally 块清理，防止内存泄漏。
  *
- * <p>内部 Feign 调用豁免：检测到 {@code X-Inner-Call: true} 请求头时，跳过加载。
- * 此时 DataScopeContextHolder 保持 null，{@link ErpDataPermissionHandler}
- * 对 null 上下文不注入任何条件。
- *
  * <p>Redis 缓存 Key 格式：{@code data:scope:{tenantId}:{userId}}
  *
  * @author erp
@@ -50,13 +46,6 @@ public class DataScopeFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
-            String innerCall = request.getHeader(HeaderConstants.INNER_CALL);
-            if ("true".equalsIgnoreCase(innerCall)) {
-                // 内部服务调用，跳过数据权限加载
-                filterChain.doFilter(request, response);
-                return;
-            }
-
             loadDataScope();
             filterChain.doFilter(request, response);
         } finally {

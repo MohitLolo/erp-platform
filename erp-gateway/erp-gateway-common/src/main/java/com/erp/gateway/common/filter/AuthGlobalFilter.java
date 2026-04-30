@@ -20,7 +20,9 @@ import org.springframework.web.server.ServerWebExchange;
 import reactor.core.publisher.Mono;
 
 import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Sa-Token JWT 鉴权过滤器
@@ -31,6 +33,8 @@ import java.util.List;
 @Slf4j
 @Component
 public class AuthGlobalFilter implements GlobalFilter, Ordered {
+    private static final com.fasterxml.jackson.databind.ObjectMapper OBJECT_MAPPER =
+            new com.fasterxml.jackson.databind.ObjectMapper();
 
     @Value("${gateway.auth.whitelist:}")
     private List<String> whitelist;
@@ -100,10 +104,17 @@ public class AuthGlobalFilter implements GlobalFilter, Ordered {
         response.setStatusCode(HttpStatus.UNAUTHORIZED);
         response.getHeaders().setContentType(MediaType.APPLICATION_JSON);
 
-        String body = String.format(
-                "{\"code\":401,\"msg\":\"%s\",\"data\":null,\"timestamp\":%d}",
-                message, System.currentTimeMillis()
-        );
+        Map<String, Object> bodyMap = new HashMap<>();
+        bodyMap.put("code", 401);
+        bodyMap.put("msg", message);
+        bodyMap.put("data", null);
+        bodyMap.put("timestamp", System.currentTimeMillis());
+        String body;
+        try {
+            body = OBJECT_MAPPER.writeValueAsString(bodyMap);
+        } catch (Exception ex) {
+            body = "{\"code\":401,\"msg\":\"Unauthorized\",\"data\":null}";
+        }
         DataBuffer buffer = response.bufferFactory()
                 .wrap(body.getBytes(StandardCharsets.UTF_8));
         return response.writeWith(Mono.just(buffer));

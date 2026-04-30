@@ -26,8 +26,8 @@ public class SysRole extends BaseEntity {
     private String roleName;
 
     /**
-     * 数据权限范围：
-     * 1-全部数据，2-本部门数据，3-本部门及以下，4-仅本人数据，5-自定义部门
+     * 数据权限范围编码（见 com.erp.common.mybatis.datascope.DataScopeLevel）：
+     * 1-ALL，2-DEPT，3-DEPT_AND_CHILD，4-SELF，5-CUSTOM_DEPT
      */
     private Integer dataScope;
 

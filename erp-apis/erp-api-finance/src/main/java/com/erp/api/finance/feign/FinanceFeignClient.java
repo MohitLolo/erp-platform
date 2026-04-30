@@ -17,7 +17,7 @@ import org.springframework.web.bind.annotation.RequestBody;
  */
 @FeignClient(
         name = "erp-finance",
-        url = "${feign.finance.url:http://erp-finance.erp-prod.svc.cluster.local:8080}"
+        url = "${feign.finance.url:http://erp-finance:8080}"
 )
 public interface FinanceFeignClient {
 

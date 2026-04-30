@@ -9,7 +9,7 @@ import java.util.Set;
  * <p>承载当前请求用户的数据权限信息，由 {@link DataScopeFilter} 从 Redis 加载后
  * 存入 {@link DataScopeContextHolder}，供 {@link ErpDataPermissionHandler} 消费。
  *
- * <p>dataScope 含义：
+ * <p>dataScope 含义（见 {@link DataScopeLevel}）：
  * <ul>
  *   <li>1 - 全部数据，不附加任何过滤条件</li>
  *   <li>2 - 本部门数据</li>
@@ -59,6 +59,10 @@ public class DataScopeContext implements Serializable {
 
     public void setDataScope(Integer dataScope) {
         this.dataScope = dataScope;
+    }
+
+    public DataScopeLevel getDataScopeLevel() {
+        return DataScopeLevel.fromCode(dataScope);
     }
 
     public Long getUserId() {

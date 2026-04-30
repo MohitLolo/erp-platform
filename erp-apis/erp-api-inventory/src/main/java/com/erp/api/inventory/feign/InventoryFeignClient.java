@@ -20,7 +20,7 @@ import java.util.List;
  */
 @FeignClient(
         name = "erp-inventory",
-        url = "${feign.inventory.url:http://erp-inventory.erp-prod.svc.cluster.local:8080}"
+        url = "${feign.inventory.url:http://erp-inventory:8080}"
 )
 public interface InventoryFeignClient {
 

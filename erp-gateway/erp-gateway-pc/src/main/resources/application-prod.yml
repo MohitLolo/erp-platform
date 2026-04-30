@@ -4,6 +4,16 @@ spring:
       discovery:
         locator:
           enabled: false
+      default-filters:
+        - RemoveRequestHeader=X-User-Id
+        - RemoveRequestHeader=X-Tenant-Id
+        - RemoveRequestHeader=X-User-Name
+        - RemoveRequestHeader=X-Inner-Call
+        - name: RequestRateLimiter
+          args:
+            redis-rate-limiter.replenishRate: 100
+            redis-rate-limiter.burstCapacity: 200
+            redis-rate-limiter.requestedTokens: 1
       routes:
         # 认证服务
         - id: erp-auth
@@ -100,14 +110,6 @@ spring:
             allowedHeaders: "*"
             allowCredentials: true
             maxAge: 3600
-
-      # 生产环境限流配置
-      default-filters:
-        - name: RequestRateLimiter
-          args:
-            redis-rate-limiter.replenishRate: 100
-            redis-rate-limiter.burstCapacity: 200
-            redis-rate-limiter.requestedTokens: 1
 
 gateway:
   auth:
