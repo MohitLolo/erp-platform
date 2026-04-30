@@ -20,6 +20,11 @@ public class SysUser extends BaseEntity {
     private String tenantId;
 
     /**
+     * 主部门ID
+     */
+    private Long deptId;
+
+    /**
      * 用户名（租户内唯一）
      */
     private String username;

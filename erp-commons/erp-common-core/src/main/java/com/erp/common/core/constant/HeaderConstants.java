@@ -26,4 +26,7 @@ public final class HeaderConstants {
 
     /** 灰度路由标签 */
     public static final String GRAY_TAG = "X-Gray-Tag";
+
+    /** 内部服务调用标识，值为 "true" 时跳过数据权限过滤 */
+    public static final String INNER_CALL = "X-Inner-Call";
 }

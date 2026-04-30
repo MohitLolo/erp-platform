@@ -23,9 +23,12 @@ public class UserService {
 
     private final SysUserMapper userMapper;
     private final SysPermissionMapper permissionMapper;
+    private final DataScopeService dataScopeService;
 
     /**
      * 验证用户凭证（供erp-auth内部调用）
+     *
+     * <p>验证成功后异步刷新该用户的数据权限缓存。
      */
     public SysUser verifyUser(String tenantId, String username, String passwordMd5) {
         SysUser user = userMapper.findByTenantAndUsername(tenantId, username);
@@ -37,6 +40,12 @@ public class UserService {
         }
         if (user.getStatus() != 1) {
             throw new BizException(ResultCode.ACCOUNT_DISABLED);
+        }
+        // 登录成功：刷新数据权限缓存
+        try {
+            dataScopeService.buildAndCache(user);
+        } catch (Exception e) {
+            log.warn("Failed to build DataScopeContext for user={}: {}", user.getId(), e.getMessage());
         }
         return user;
     }

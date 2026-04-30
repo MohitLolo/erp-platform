@@ -23,35 +23,47 @@
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <!-- Spring -->
+
+        <!-- Spring 核心框架版本 -->
         <spring-boot.version>3.2.5</spring-boot.version>
-        <spring-cloud.version>2023.0.1</spring-cloud.version>
+        <spring-cloud.version>2023.0.4</spring-cloud.version>
+
+        <!-- Spring Cloud Alibaba - 关键更新：适配 Spring Boot 3.2.x -->
+        <spring-cloud-alibaba.version>2023.0.1.1</spring-cloud-alibaba.version>
+
         <!-- 数据层 -->
-        <mybatis-plus.version>3.5.6</mybatis-plus.version>
-        <dynamic-datasource.version>4.3.0</dynamic-datasource.version>
+        <mybatis-plus.version>3.5.12</mybatis-plus.version>
+        <dynamic-datasource.version>4.3.1</dynamic-datasource.version>
         <mysql.version>8.3.0</mysql.version>
-        <!-- 认证 -->
-        <sa-token.version>1.38.0</sa-token.version>
+
+        <!-- 认证授权 - Sa-Token -->
+        <sa-token.version>1.40.0</sa-token.version>
+
         <!-- 分布式事务 -->
-        <seata.version>2.1.0</seata.version>
+        <seata.version>2.2.0</seata.version>  <!-- 更新：支持 Spring Boot 3.x -->
+
         <!-- 分布式工具 -->
-        <redisson.version>3.27.2</redisson.version>
+        <redisson.version>3.47.0</redisson.version>
+
         <!-- 线程上下文传递 -->
         <transmittable-thread-local.version>2.14.5</transmittable-thread-local.version>
         <!-- 文档生成 -->
         <smart-doc.version>3.0.3</smart-doc.version>
-        <!-- 熔断限流 -->
+
+        <!-- Sentinel - 保持与 Spring Cloud Alibaba 2023.0.1.1 一致 -->
         <sentinel.version>1.8.8</sentinel.version>
-        <!-- Excel -->
-        <easyexcel.version>3.3.4</easyexcel.version>
-        <!-- Spring Cloud Alibaba -->
-        <spring-cloud-alibaba.version>2023.0.1.0</spring-cloud-alibaba.version>
-        <!-- 工具 -->
-        <hutool.version>5.8.26</hutool.version>
-        <mapstruct.version>1.5.5.Final</mapstruct.version>
+
+        <!-- Excel - 注意：EasyExcel 官方已停更，建议迁移 -->
+        <easyexcel.version>4.0.3</easyexcel.version>
+        <!-- 工具库 -->
+        <hutool.version>5.8.44</hutool.version>
+        <mapstruct.version>1.6.3</mapstruct.version>
+
         <!-- 分布式定时任务 -->
-        <xxl-job.version>2.4.1</xxl-job.version>
-        <lombok.version>1.18.32</lombok.version>
+        <xxl-job.version>3.3.0</xxl-job.version>
+
+        <lombok.version>1.18.36</lombok.version>
+
         <!-- 链路追踪 -->
         <skywalking.version>9.3.0</skywalking.version>
     </properties>
@@ -139,6 +151,28 @@
                 <version>1.0.0-SNAPSHOT</version>
             </dependency>
 
+            <!-- ===== Spring Cloud Alibaba ===== -->
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-nacos-discovery</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-nacos-config</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>com.alibaba.cloud</groupId>
+                <artifactId>spring-cloud-alibaba-sentinel-gateway</artifactId>
+                <version>${spring-cloud-alibaba.version}</version>
+            </dependency>
+
             <!-- ===== MyBatis-Plus ===== -->
             <dependency>
                 <groupId>com.baomidou</groupId>
@@ -194,23 +228,11 @@
                 <version>${transmittable-thread-local.version}</version>
             </dependency>
 
-            <!-- ===== Resilience4j ===== -->
+            <!-- ===== Resilience4j (可选，作为 Sentinel 补充) ===== -->
             <dependency>
                 <groupId>io.github.resilience4j</groupId>
                 <artifactId>resilience4j-spring-boot3</artifactId>
                 <version>2.2.0</version>
-            </dependency>
-
-            <!-- ===== Sentinel Gateway ===== -->
-            <dependency>
-                <groupId>com.alibaba.csp</groupId>
-                <artifactId>sentinel-spring-cloud-gateway-adapter</artifactId>
-                <version>${sentinel.version}</version>
-            </dependency>
-            <dependency>
-                <groupId>com.alibaba.cloud</groupId>
-                <artifactId>spring-cloud-alibaba-sentinel-gateway</artifactId>
-                <version>${spring-cloud-alibaba.version}</version>
             </dependency>
 
             <!-- ===== EasyExcel ===== -->

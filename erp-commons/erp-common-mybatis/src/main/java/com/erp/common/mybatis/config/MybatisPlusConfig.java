@@ -3,15 +3,22 @@ package com.erp.common.mybatis.config;
 import com.baomidou.mybatisplus.annotation.DbType;
 import com.baomidou.mybatisplus.core.handlers.MetaObjectHandler;
 import com.baomidou.mybatisplus.extension.plugins.MybatisPlusInterceptor;
+import com.baomidou.mybatisplus.extension.plugins.inner.DataPermissionInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.OptimisticLockerInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.PaginationInnerInterceptor;
 import com.baomidou.mybatisplus.extension.plugins.inner.TenantLineInnerInterceptor;
 import com.erp.common.core.context.TenantContextHolder;
+import com.erp.common.mybatis.datascope.DataScopeFilter;
+import com.erp.common.mybatis.datascope.ErpDataPermissionHandler;
 import com.erp.common.mybatis.handler.ErpMetaObjectHandler;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.sf.jsqlparser.expression.Expression;
 import net.sf.jsqlparser.expression.StringValue;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.StringRedisTemplate;
 
 /**
  * MyBatis-Plus 全局配置
@@ -33,7 +40,7 @@ public class MybatisPlusConfig {
     /**
      * MyBatis-Plus 拦截器链
      *
-     * <p>顺序：多租户 → 分页 → 乐观锁
+     * <p>顺序：多租户 → 数据权限 → 分页 → 乐观锁
      */
     @Bean
     public MybatisPlusInterceptor mybatisPlusInterceptor() {
@@ -60,10 +67,13 @@ public class MybatisPlusConfig {
                 }
         ));
 
-        // 2. 分页（MySQL）
+        // 2. 数据权限（行级 SQL 过滤）
+        interceptor.addInnerInterceptor(new DataPermissionInterceptor(new ErpDataPermissionHandler()));
+
+        // 3. 分页（MySQL）
         interceptor.addInnerInterceptor(new PaginationInnerInterceptor(DbType.MYSQL));
 
-        // 3. 乐观锁
+        // 4. 乐观锁
         interceptor.addInnerInterceptor(new OptimisticLockerInnerInterceptor());
 
         return interceptor;
@@ -75,5 +85,18 @@ public class MybatisPlusConfig {
     @Bean
     public MetaObjectHandler erpMetaObjectHandler() {
         return new ErpMetaObjectHandler();
+    }
+
+    /**
+     * 数据权限过滤器（仅在 StringRedisTemplate 存在时注册）
+     *
+     * <p>未引入 Redis 的服务不会注册此 Filter，安全引入 erp-common-mybatis 不报错。
+     */
+    @Bean
+    @ConditionalOnBean(StringRedisTemplate.class)
+    public DataScopeFilter dataScopeFilter(StringRedisTemplate redisTemplate,
+                                           @Autowired(required = false) ObjectMapper objectMapper) {
+        ObjectMapper mapper = objectMapper != null ? objectMapper : new ObjectMapper();
+        return new DataScopeFilter(redisTemplate, mapper);
     }
 }

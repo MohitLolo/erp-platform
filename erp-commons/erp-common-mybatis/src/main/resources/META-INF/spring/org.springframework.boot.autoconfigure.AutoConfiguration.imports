@@ -1,1 +1,2 @@
 com.erp.common.mybatis.config.MybatisDefaultsAutoConfiguration
+com.erp.common.mybatis.config.MybatisPlusConfig
