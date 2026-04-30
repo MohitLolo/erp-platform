@@ -3,7 +3,7 @@
 # 挂载路径: /config/auth.yml
 sa-token:
   token-name: Authorization
-  token-style: jwt-default
+  token-style: jwt-mixin
   timeout: 86400
   active-timeout: 1800
   is-concurrent: false
