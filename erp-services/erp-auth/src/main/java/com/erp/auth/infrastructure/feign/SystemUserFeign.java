@@ -4,7 +4,10 @@ import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
 import lombok.Data;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestParam;
+
+import java.util.List;
 
 /**
  * erp-system 用户验证Feign客户端
@@ -31,6 +34,18 @@ public interface SystemUserFeign {
     default UserInfo verifyUserFallback(String tenantId, String username, String passwordMd5, Exception e) {
         throw new RuntimeException("系统服务暂时不可用，请稍后重试", e);
     }
+
+    /**
+     * 查询用户权限码列表（permType=2,3）
+     */
+    @GetMapping("/internal/users/{userId}/permissions")
+    List<String> getUserPermissions(@PathVariable("userId") Long userId);
+
+    /**
+     * 查询用户角色码列表
+     */
+    @GetMapping("/internal/users/{userId}/roles")
+    List<String> getUserRoles(@PathVariable("userId") Long userId);
 
     /**
      * 用户信息VO（内部接口专用）

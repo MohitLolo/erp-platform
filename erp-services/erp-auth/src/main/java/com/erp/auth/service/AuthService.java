@@ -1,5 +1,6 @@
 package com.erp.auth.service;
 
+import cn.dev33.satoken.session.SaSession;
 import cn.dev33.satoken.stp.SaLoginModel;
 import cn.dev33.satoken.stp.StpUtil;
 import com.erp.auth.dto.LoginRequest;
@@ -11,6 +12,8 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
+
+import java.util.List;
 
 /**
  * 认证服务
@@ -53,8 +56,16 @@ public class AuthService {
                         .setExtra("tenantName", userInfo.getTenantName())
         );
 
+        // 3. 写权限到 Redis Session（jwt-mixin 模式下 Session 已创建）
+        SaSession session = StpUtil.getSessionByLoginId(userInfo.getUserId());
+        List<String> permCodes = systemUserFeign.getUserPermissions(userInfo.getUserId());
+        List<String> roleCodes = systemUserFeign.getUserRoles(userInfo.getUserId());
+        session.set("permissions", permCodes != null ? permCodes : List.of());
+        session.set("roles", roleCodes != null ? roleCodes : List.of());
+
         String token = StpUtil.getTokenValue();
-        log.info("User login success: userId={}, tenantId={}", userInfo.getUserId(), request.getTenantId());
+        log.info("User login success: userId={}, tenantId={}, permissions={}",
+                userInfo.getUserId(), request.getTenantId(), permCodes != null ? permCodes.size() : 0);
 
         return LoginResponse.builder()
                 .token(token)
