@@ -27,6 +27,7 @@ public interface SysPermissionMapper extends BaseMapper<SysPermission> {
               AND r.status = 1
               AND p.status = 1
               AND p.deleted = 0
+              AND p.perm_type IN (2, 3)
             """)
     List<String> findPermCodesByUserId(@Param("userId") Long userId);
 
