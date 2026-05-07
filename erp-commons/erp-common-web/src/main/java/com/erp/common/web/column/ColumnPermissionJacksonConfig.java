@@ -1,6 +1,7 @@
 package com.erp.common.web.column;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.context.annotation.Bean;
 
@@ -31,8 +32,7 @@ public class ColumnPermissionJacksonConfig {
             ObjectMapper objectMapper) {
         ColumnPermissionBeanSerializerModifier modifier = new ColumnPermissionBeanSerializerModifier();
         objectMapper.registerModule(
-                new com.fasterxml.jackson.databind.module.SimpleModule()
-                        .setSerializerModifier(modifier)
+                new SimpleModule().setSerializerModifier(modifier)
         );
         return modifier;
     }

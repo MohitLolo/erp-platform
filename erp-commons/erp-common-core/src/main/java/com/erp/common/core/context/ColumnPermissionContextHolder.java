@@ -2,7 +2,6 @@ package com.erp.common.core.context;
 
 import com.alibaba.ttl.TransmittableThreadLocal;
 
-import java.util.Collections;
 import java.util.Set;
 
 /**

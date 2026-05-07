@@ -53,7 +53,7 @@ public class DataScopeFilter extends OncePerRequestFilter {
                                     FilterChain filterChain) throws ServletException, IOException {
         try {
             loadDataScope();
-            loadColumnPermissions();
+            loadColumnPermissions(request);
             filterChain.doFilter(request, response);
         } finally {
             DataScopeContextHolder.clear();
@@ -84,16 +84,16 @@ public class DataScopeFilter extends OncePerRequestFilter {
     /**
      * 从 Sa-Token Redis Session 加载当前用户的权限码集合，写入 ColumnPermissionContextHolder。
      *
-     * <p>内部 Feign 调用（携带 X-Inner-Call: true）时跳过，保持 Holder 为 null，
-     * ColumnPermissionSerializer 遇到 null 时直接放行（hasPermission 返回 true）。
+     * <p>内部 Feign 调用（携带 {@code X-Inner-Call: true}）时直接跳过，保持 Holder 为 null，
+     * {@code ColumnPermissionSerializer} 遇到 null 时直接放行（hasPermission 返回 true）。
      *
      * <p>userId 为 null（未登录）时跳过；Gateway 已确保非法请求不到达此处。
      */
-    private void loadColumnPermissions() {
-        // 内部调用豁免：不做列权限过滤
-        // （HeaderConstants.INNER_CALL 已在当前请求的 ServletRequest 中，
-        //   但 DataScopeFilter 在 Servlet 层，无法直接获取；
-        //   兜底：userId 为 null 时自然跳过）
+    private void loadColumnPermissions(HttpServletRequest request) {
+        // 内部服务调用豁免：Header X-Inner-Call: true 时不做列权限过滤，Holder 保持 null
+        if ("true".equalsIgnoreCase(request.getHeader(HeaderConstants.INNER_CALL))) {
+            return;
+        }
         Long userId = TenantContextHolder.getUserId();
         if (userId == null) {
             return;

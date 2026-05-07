@@ -42,7 +42,13 @@ public class ColumnPermissionSerializer extends JsonSerializer<Object> {
 
         if (ColumnPermissionContextHolder.hasPermission(permCode)) {
             // 有权限（含内部调用）→ 正常序列化
-            delegate.serialize(value, gen, serializers);
+            // delegate 在 BeanSerializerModifier.changeProperties() 调用时可能尚未解析（Jackson 延迟绑定），
+            // 此处回退到 defaultSerializeValue 以防 NPE
+            if (delegate != null) {
+                delegate.serialize(value, gen, serializers);
+            } else {
+                serializers.defaultSerializeValue(value, gen);
+            }
         } else {
             // 无权限 → 写 null，key 保留便于前端渲染占位符
             gen.writeNull();
