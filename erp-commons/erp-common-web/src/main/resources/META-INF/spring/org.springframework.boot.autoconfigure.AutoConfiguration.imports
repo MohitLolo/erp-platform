@@ -1,1 +1,2 @@
 com.erp.common.web.config.WebDefaultsAutoConfiguration
+com.erp.common.web.column.ColumnPermissionJacksonConfig

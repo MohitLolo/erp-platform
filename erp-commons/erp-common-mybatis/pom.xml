@@ -23,7 +23,7 @@
         </dependency>
         <dependency>
             <groupId>com.baomidou</groupId>
-            <artifactId>mybatis-plus-boot-starter</artifactId>
+            <artifactId>mybatis-plus-spring-boot3-starter</artifactId>
         </dependency>
         <!-- JSqlParser（mybatis-plus 3.5.12 中标记 optional，需显式引入） -->
         <dependency>
@@ -47,6 +47,13 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-data-redis</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- ColumnPermissionContextHolder 填充：读取 Sa-Token Redis Session -->
+        <!-- optional=true，不传递给下游；业务服务通过 erp-common-auth 引入实际实现 -->
+        <dependency>
+            <groupId>cn.dev33</groupId>
+            <artifactId>sa-token-spring-boot3-starter</artifactId>
             <optional>true</optional>
         </dependency>
     </dependencies>

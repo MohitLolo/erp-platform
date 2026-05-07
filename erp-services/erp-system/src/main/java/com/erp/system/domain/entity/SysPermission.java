@@ -68,4 +68,13 @@ public class SysPermission extends BaseEntity {
      * 状态：1-启用，0-禁用
      */
     private Integer status;
+
+    /**
+     * 字段名（perm_type=4 列权限专用）
+     *
+     * <p>对应业务 VO 中 {@code @ColumnPermission} 注解所保护的字段名，
+     * 仅用于管理界面展示和运维排查，不参与鉴权逻辑（鉴权只用 perm_code）。
+     * 其他 perm_type 此字段为 NULL。
+     */
+    private String fieldName;
 }
