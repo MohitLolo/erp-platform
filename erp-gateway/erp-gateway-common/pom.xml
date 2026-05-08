@@ -51,6 +51,11 @@
             <groupId>com.alibaba.cloud</groupId>
             <artifactId>spring-cloud-alibaba-sentinel-gateway</artifactId>
         </dependency>
+        <!-- Sentinel 核心 starter：传递 sentinel-core 与 sentinel-datasource-extension（提供 Converter 等类） -->
+        <dependency>
+            <groupId>com.alibaba.cloud</groupId>
+            <artifactId>spring-cloud-starter-alibaba-sentinel</artifactId>
+        </dependency>
         <!-- 公共 core（R / ResultCode / HeaderConstants 等） -->
         <dependency>
             <groupId>com.erp.commons</groupId>

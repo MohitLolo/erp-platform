@@ -39,7 +39,7 @@ services:
   # Redis（Session + 缓存）
   # ============================================================
   redis:
-    image: redis:7.2-alpine
+    image: redis:7-alpine
     container_name: erp-redis
     command: redis-server --requirepass "Erp@redis2024" --maxmemory 512mb --maxmemory-policy allkeys-lru
     ports:
