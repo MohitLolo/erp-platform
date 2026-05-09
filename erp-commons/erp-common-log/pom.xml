@@ -14,14 +14,15 @@
 
     <artifactId>erp-common-log</artifactId>
     <name>erp-common-log</name>
-    <description>MDC + SkyWalking TraceId 日志增强</description>
+    <description>MDC + SkyWalking TraceId 日志增强 / 用户操作日志（@SaCheckPermission AOP）</description>
 
     <dependencies>
+        <!-- ====== 既有：MDC TraceId Filter ====== -->
         <dependency>
             <groupId>com.erp.commons</groupId>
             <artifactId>erp-common-core</artifactId>
         </dependency>
-        <!-- Spring Web（OncePerRequestFilter） -->
+        <!-- Spring Web（OncePerRequestFilter / RequestContextHolder） -->
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
@@ -30,6 +31,62 @@
         <dependency>
             <groupId>ch.qos.logback</groupId>
             <artifactId>logback-classic</artifactId>
+        </dependency>
+
+        <!-- ====== 新增：操作日志 AOP ====== -->
+        <!-- Sa-Token 注解（@SaCheckPermission）+ StpUtil -->
+        <dependency>
+            <groupId>com.erp.commons</groupId>
+            <artifactId>erp-common-auth</artifactId>
+        </dependency>
+        <!-- Redisson RMap 作为 L2 权限名缓存 -->
+        <dependency>
+            <groupId>com.erp.commons</groupId>
+            <artifactId>erp-common-redis</artifactId>
+        </dependency>
+        <!-- MyBatis-Plus BaseMapper（写 operation_log） -->
+        <dependency>
+            <groupId>com.erp.commons</groupId>
+            <artifactId>erp-common-mybatis</artifactId>
+        </dependency>
+        <!-- @DS 多数据源切换到 erp_log -->
+        <dependency>
+            <groupId>com.baomidou</groupId>
+            <artifactId>dynamic-datasource-spring-boot3-starter</artifactId>
+        </dependency>
+        <!-- Spring AOP（@Aspect / @Around） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-aop</artifactId>
+        </dependency>
+        <!-- Caffeine L1 本地缓存（权限名解析） -->
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
+        <!-- @ConfigurationProperties 校验（@NotNull/@Min 等） -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-validation</artifactId>
+        </dependency>
+        <!-- micrometer：异步队列 / Caffeine 命中率指标（actuator 已带，这里 optional） -->
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-core</artifactId>
+            <optional>true</optional>
+        </dependency>
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <optional>true</optional>
+        </dependency>
+
+        <!-- ====== 测试 ====== -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-test</artifactId>
+            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>
